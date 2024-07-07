@@ -1,16 +1,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
-	log.Println("Starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
+
+	addr := flag.String("addr", ":4000", "HTTP network address")
+	htmlDir := flag.String("html-dir", "./ui/html", "Path to HTML templates")
+	staticDir := flag.String("static-dir", "./ui/static", "Path to static assets directory")
+	flag.Parse()
+
+	app := &App{
+		HTMLDIR:   *htmlDir,
+		StaticDir: *staticDir,
+	}
+
+	log.Printf("Server listening on %s", *addr)
+	err := http.ListenAndServe(*addr, app.Routes())
 	log.Fatal(err)
 }
